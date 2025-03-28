@@ -2,6 +2,17 @@
 
 This directory contains example usage of the MCP Agent library.
 
+## Overview of Examples
+
+| Example              | Description                                                                       | Source File                                      |
+| -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Basic Usage          | Simple example showing how to initialize an agent and generate a response         | [basic-usage.ts](./src/basic-usage.ts)           |
+| Multiple Servers     | Demonstrates using multiple MCP servers (sequential-thinking and memory) together | [multiple-servers.ts](./src/multiple-servers.ts) |
+| Custom Configuration | Shows how to configure environment variables and set max steps                    | [custom-config.ts](./src/custom-config.ts)       |
+| Claude Model         | Example of using Anthropic's Claude model instead of OpenAI                       | [claude-example.ts](./src/claude-example.ts)     |
+| Image Processing     | Demonstrates sending and processing images with MCP Agent                         | [image-example.ts](./src/image-example.ts)       |
+| PDF Processing       | Shows how to process PDF documents using MCP Agent                                | [pdf-example.ts](./src/pdf-example.ts)           |
+
 ## Basic Examples
 
 ### 1. Basic Usage
@@ -122,6 +133,102 @@ console.log(response);
 await agent.close();
 ```
 
+### 5. Processing Images
+
+```typescript
+import { MCPAgent } from "mcp-ai-agent";
+import { openai } from "@ai-sdk/openai";
+import fs from "fs";
+import path from "path";
+
+const agent = new MCPAgent({
+  mcpServers: {
+    "sequential-thinking": {
+      command: "npx",
+      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+    },
+  },
+});
+
+await agent.initialize();
+
+// Read the image file
+const imagePath = path.join(__dirname, "../files/equation.png");
+const imageBuffer = fs.readFileSync(imagePath);
+
+// Generate a response using the image
+const response = await agent.generateResponse({
+  model: openai("gpt-4o-mini"),
+  messages: [
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: "Use sequential thinking to solve the equation in this image",
+        },
+        {
+          type: "image",
+          image: imageBuffer,
+        },
+      ],
+    },
+  ],
+});
+
+console.log(response.text);
+await agent.close();
+```
+
+### 6. Processing PDFs
+
+```typescript
+import { MCPAgent } from "mcp-ai-agent";
+import { openai } from "@ai-sdk/openai";
+import fs from "fs";
+import path from "path";
+
+const agent = new MCPAgent({
+  mcpServers: {
+    "sequential-thinking": {
+      command: "npx",
+      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+    },
+  },
+});
+
+await agent.initialize();
+
+// Read the PDF file
+const pdfPath = path.join(__dirname, "../files/equation.pdf");
+const pdfBuffer = fs.readFileSync(pdfPath);
+
+// Generate a response using the PDF
+const response = await agent.generateResponse({
+  model: openai("gpt-4o-mini"),
+  messages: [
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: "Use sequential thinking to solve the equation in this PDF",
+        },
+        {
+          type: "file",
+          data: pdfBuffer,
+          filename: "equation.pdf",
+          mimeType: "application/pdf",
+        },
+      ],
+    },
+  ],
+});
+
+console.log(response.text);
+await agent.close();
+```
+
 ## Using Different Models
 
 The MCP Agent supports various AI models through the AI SDK. Here are examples of how to use different models:
@@ -157,34 +264,60 @@ It also supports any model supported by Vercel AI SDK that support tool usage: h
 
 ## Running Examples
 
-1. Install dependencies:
+Follow these steps to run any of the examples:
 
-```bash
-npm install
-```
+1. **Install dependencies**:
 
-2. Create a `.env` file with your API keys:
+   ```bash
+   npm install
+   ```
 
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-CLAUDE_API_KEY=your_claude_api_key_here
-```
+2. **Set up environment variables**:
+   Create a `.env` file in the root directory with your API keys:
 
-3. Run an example using npm scripts:
+   ```bash
+   OPENAI_API_KEY=your_openai_api_key_here
+   CLAUDE_API_KEY=your_claude_api_key_here  # Only needed for Claude examples
+   ```
 
-```bash
-# Basic usage example
-npm run basic-usage
+3. **Build and run a specific example**:
+   Each example has a corresponding npm script that builds and runs it:
 
-# Multiple servers example
-npm run multiple-servers
+   ```bash
+   # Basic usage example
+   npm run basic-usage
 
-# Custom configuration example
-npm run custom-config
+   # Multiple servers example
+   npm run multiple-servers
 
-# Claude example
-npm run claude-example
-```
+   # Custom configuration example
+   npm run custom-config
+
+   # Claude example
+   npm run claude-example
+
+   # Image processing example
+   npm run image-example
+
+   # PDF processing example
+   npm run pdf-example
+   ```
+
+4. **Alternative: Run manually**:
+   You can also build and run manually:
+
+   ```bash
+   # First build the TypeScript files
+   npm run build
+
+   # Then run a specific example
+   node dist/basic-usage.js
+   ```
+
+5. **For image and PDF examples**:
+   Make sure the required files exist in the `files` directory:
+   - `files/equation.png` - An image containing an equation
+   - `files/equation.pdf` - A PDF file containing an equation
 
 ## Directory Structure
 
@@ -192,6 +325,8 @@ npm run claude-example
 - `multiple-servers.ts` - Example using sequential thinking and memory servers
 - `custom-config.ts` - Example with custom environment variables and max steps
 - `claude-example.ts` - Example using Claude model with sequential thinking
+- `image-example.ts` - Example demonstrating image processing capabilities
+- `pdf-example.ts` - Example demonstrating PDF processing capabilities
 
 ## Requirements
 

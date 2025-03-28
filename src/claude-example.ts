@@ -31,13 +31,14 @@ async function runExample() {
 
     // Example: Using Claude with sequential thinking
     console.log("\nUsing Claude to solve a complex problem...");
-    const response = await agent.generateResponse(
-      "Solve this complex problem step by step: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?",
-      anthropic("claude-3-7-sonnet-20250219"),
-      25 // Max steps
-    );
+    const response = await agent.generateResponse({
+      prompt:
+        "Solve this complex problem step by step: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?",
+      model: anthropic("claude-3-7-sonnet-20250219"),
+      maxSteps: 25,
+    });
 
-    console.log("\nResponse:", response);
+    console.log("\nResponse:", response.text);
   } catch (error) {
     console.error(
       "Error in example:",

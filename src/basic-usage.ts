@@ -32,13 +32,13 @@ async function runExample() {
 
     // Example: Using sequential thinking
     console.log("\nUsing sequential thinking to answer a question...");
-    const response = await agent.generateResponse(
-      "Solve 23 * 17",
-      openai("gpt-4o"),
-      25 // Max steps
-    );
+    const response = await agent.generateResponse({
+      prompt: "Solve 23 * 17",
+      model: openai("gpt-4o"),
+      maxSteps: 25,
+    });
 
-    console.log("\nResponse:", response);
+    console.log("\nResponse:", response.text);
   } catch (error) {
     console.error(
       "Error in example:",
