@@ -1,4 +1,4 @@
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { anthropic } from "@ai-sdk/anthropic";
 import * as dotenv from "dotenv";
 
@@ -14,14 +14,7 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 async function runExample() {
   // Create an MCPAgent with Claude model
-  const agent = new MCPAgent({
-    mcpServers: {
-      "sequential-thinking": {
-        command: "npx",
-        args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      },
-    },
-  });
+  const agent = new MCPAgent(Servers.sequentialThinking);
 
   try {
     // Initialize the agent

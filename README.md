@@ -12,26 +12,20 @@ This directory contains example usage of the MCP Agent library.
 | Claude Model         | Example of using Anthropic's Claude model instead of OpenAI                       | [claude-example.ts](./src/claude-example.ts)     |
 | Image Processing     | Demonstrates sending and processing images with MCP Agent                         | [image-example.ts](./src/image-example.ts)       |
 | PDF Processing       | Shows how to process PDF documents using MCP Agent                                | [pdf-example.ts](./src/pdf-example.ts)           |
+| Find MCP Server      | Example of searching for an appropriate MCP server for a specific task            | [find-mcp.ts](./src/find-mcp.ts)                 |
 
 ## Basic Examples
 
 ### 1. Basic Usage
 
 ```typescript
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const agent = new MCPAgent({
-  mcpServers: {
-    "sequential-thinking": {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-    },
-  },
-});
+const agent = new MCPAgent(Servers.sequentialThinking);
 
 await agent.initialize();
 const response = await agent.generateResponse(
@@ -45,18 +39,14 @@ await agent.close();
 ### 2. Multiple MCP Servers
 
 ```typescript
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const agent = new MCPAgent({
+const agent = new MCPAgent(Servers.sequentialThinking, {
   mcpServers: {
-    "sequential-thinking": {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-    },
     memory: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-memory"],
@@ -76,7 +66,7 @@ await agent.close();
 ### 3. Custom Configuration
 
 ```typescript
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
@@ -108,20 +98,13 @@ await agent.close();
 ### 4. Using Claude Model
 
 ```typescript
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { claude } from "@ai-sdk/claude";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const agent = new MCPAgent({
-  mcpServers: {
-    "sequential-thinking": {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-    },
-  },
-});
+const agent = new MCPAgent(Servers.sequentialThinking);
 
 await agent.initialize();
 const response = await agent.generateResponse(
@@ -136,19 +119,12 @@ await agent.close();
 ### 5. Processing Images
 
 ```typescript
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import fs from "fs";
 import path from "path";
 
-const agent = new MCPAgent({
-  mcpServers: {
-    "sequential-thinking": {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-    },
-  },
-});
+const agent = new MCPAgent(Servers.sequentialThinking);
 
 await agent.initialize();
 
@@ -183,19 +159,12 @@ await agent.close();
 ### 6. Processing PDFs
 
 ```typescript
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import fs from "fs";
 import path from "path";
 
-const agent = new MCPAgent({
-  mcpServers: {
-    "sequential-thinking": {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-    },
-  },
-});
+const agent = new MCPAgent(Servers.sequentialThinking);
 
 await agent.initialize();
 
@@ -227,6 +196,60 @@ const response = await agent.generateResponse({
 
 console.log(response.text);
 await agent.close();
+```
+
+### 7. Find MCP Server
+
+```typescript
+import { openai } from "@ai-sdk/openai";
+import fs from "fs";
+import { MCPAgent, Servers } from "mcp-ai-agent";
+
+// Ensure required environment variables are set
+if (!process.env.OPENAI_API_KEY) {
+  console.error("ERROR: OPENAI_API_KEY environment variable is required");
+  process.exit(1);
+}
+
+async function main() {
+  // Initialize the MCPAgent with both the braveSearch and sequentialThinking servers
+  const agent = new MCPAgent(Servers.braveSearch, Servers.sequentialThinking);
+
+  try {
+    // Initialize the agent
+    await agent.initialize();
+    console.log("Agent initialized successfully");
+
+    const jsonConfig = {
+      mcpServers: {
+        everything: {
+          command: "npx",
+          args: ["-y", "@modelcontextprotocol/server-everything"],
+        },
+      },
+    };
+
+    // Search for an appropriate MCP server
+    const response = await agent.generateResponse({
+      model: openai("gpt-4o"),
+      system: `Research a mcp server for the following task. It should be stdio tool installed through npx or uvx. Output only one of the following: either a JSON configuration like this \`\`\`json${JSON.stringify(
+        jsonConfig
+      )}\`\`\` or the text TOOL_NOT_FOUND. Use sequential-thinking to guide the search.`,
+      prompt: "MCP Server for the Slack API",
+    });
+
+    // Display the response
+    console.log("\nResponse:");
+    console.log(response.text);
+  } catch (error) {
+    console.error("Error:", error);
+  } finally {
+    // Close the agent
+    await agent.close();
+  }
+}
+
+main();
 ```
 
 ## Using Different Models
@@ -280,7 +303,7 @@ Follow these steps to run any of the examples:
    CLAUDE_API_KEY=your_claude_api_key_here  # Only needed for Claude examples
    ```
 
-3. **Build and run a specific example**:
+3. **Run a specific example**:
    Each example has a corresponding npm script that builds and runs it:
 
    ```bash
@@ -301,6 +324,9 @@ Follow these steps to run any of the examples:
 
    # PDF processing example
    npm run pdf-example
+
+   # Find MCP server example
+   npm run find-mcp
    ```
 
 4. **Alternative: Run manually**:
@@ -321,12 +347,13 @@ Follow these steps to run any of the examples:
 
 ## Directory Structure
 
-- `basic-usage.ts` - Basic example with sequential thinking and error handling
-- `multiple-servers.ts` - Example using sequential thinking and memory servers
-- `custom-config.ts` - Example with custom environment variables and max steps
-- `claude-example.ts` - Example using Claude model with sequential thinking
-- `image-example.ts` - Example demonstrating image processing capabilities
-- `pdf-example.ts` - Example demonstrating PDF processing capabilities
+- `src/basic-usage.ts` - Basic example with sequential thinking and error handling
+- `src/multiple-servers.ts` - Example using sequential thinking and memory servers
+- `src/custom-config.ts` - Example with custom environment variables and max steps
+- `src/claude-example.ts` - Example using Claude model with sequential thinking
+- `src/image-example.ts` - Example demonstrating image processing capabilities
+- `src/pdf-example.ts` - Example demonstrating PDF processing capabilities
+- `src/find-mcp.ts` - Example of searching for an appropriate MCP server for a specific task
 
 ## Requirements
 

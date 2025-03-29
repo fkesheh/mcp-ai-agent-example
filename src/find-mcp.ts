@@ -10,37 +10,29 @@ if (!process.env.OPENAI_API_KEY) {
 
 async function main() {
   // Initialize the MCPAgent with the sequential-thinking server
-  const agent = new MCPAgent(Servers.sequentialThinking);
+  const agent = new MCPAgent(Servers.braveSearch, Servers.sequentialThinking);
 
   try {
     // Initialize the agent
     await agent.initialize();
     console.log("Agent initialized successfully");
 
-    // Read the PDF file
-    const pdfPath = "files/equation.pdf";
-    const pdfBuffer = fs.readFileSync(pdfPath);
+    const jsonConfig = {
+      mcpServers: {
+        everything: {
+          command: "npx",
+          args: ["-y", "@modelcontextprotocol/server-everything"],
+        },
+      },
+    };
 
     // Generate a response using the PDF
     const response = await agent.generateResponse({
-      model: openai("gpt-4o-mini"),
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Use sequential thinking to solve the equation in this PDF",
-            },
-            {
-              type: "file",
-              data: pdfBuffer,
-              filename: "equation.pdf",
-              mimeType: "application/pdf",
-            },
-          ],
-        },
-      ],
+      model: openai("gpt-4o"),
+      system: `Research a mcp server for the following task. It should be stdio tool installed through npx or uvx. Output only one of the following: either a JSON configuration like this \`\`\`json${JSON.stringify(
+        jsonConfig
+      )}\`\`\` or the text TOOL_NOT_FOUND. Use sequential-thinking to guide the search.`,
+      prompt: "MCP Server for the Slack API",
     });
 
     // Display the response

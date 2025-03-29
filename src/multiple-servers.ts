@@ -1,4 +1,4 @@
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
@@ -6,12 +6,8 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
-  const agent = new MCPAgent({
+  const agent = new MCPAgent(Servers.sequentialThinking, {
     mcpServers: {
-      "sequential-thinking": {
-        command: "npx",
-        args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      },
       memory: {
         command: "npx",
         args: ["-y", "@modelcontextprotocol/server-memory"],

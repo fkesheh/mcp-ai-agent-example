@@ -1,4 +1,4 @@
-import { MCPAgent } from "mcp-ai-agent";
+import { MCPAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
@@ -14,15 +14,7 @@ if (!process.env.OPENAI_API_KEY) {
 
 async function runExample() {
   // Create an MCPAgent with inline JSON configuration
-  const agent = new MCPAgent({
-    mcpServers: {
-      "sequential-thinking": {
-        command: "npx",
-        args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      },
-      // Add other servers as needed
-    },
-  });
+  const agent = new MCPAgent(Servers.sequentialThinking);
 
   try {
     // Initialize the agent (connects to all servers)
