@@ -4,16 +4,17 @@ This directory contains example usage of the MCP Agent library.
 
 ## Overview of Examples
 
-| Example                   | Description                                                                       | Source File                                            |
-| ------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| Basic Usage               | Simple example showing how to initialize an agent and generate a response         | [basic-usage.ts](./src/basic-usage.ts)                 |
-| Multiple Servers          | Demonstrates using multiple MCP servers (sequential-thinking and memory) together | [multiple-servers.ts](./src/multiple-servers.ts)       |
-| Custom Configuration      | Shows how to configure environment variables and set max steps                    | [custom-config.ts](./src/custom-config.ts)             |
-| Claude Model              | Example of using Anthropic's Claude model instead of OpenAI                       | [claude-example.ts](./src/claude-example.ts)           |
-| Image Processing          | Demonstrates sending and processing images with MCP Agent                         | [image-example.ts](./src/image-example.ts)             |
-| PDF Processing            | Shows how to process PDF documents using MCP Agent                                | [pdf-example.ts](./src/pdf-example.ts)                 |
-| Find MCP Server           | Example of searching for an appropriate MCP server for a specific task            | [find-mcp.ts](./src/find-mcp.ts)                       |
-| Manus Like Research Agent | Advanced autonomous agent that performs complex research tasks                    | [manus-like-research.ts](./src/manus-research-task.ts) |
+| Example                   | Description                                                                       | Source File                                            | NPM Command                |
+| ------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------------------- |
+| Basic Usage               | Simple example showing how to initialize an agent and generate a response         | [basic-usage.ts](./src/basic-usage.ts)                 | `npm run basic-usage`      |
+| Multiple Servers          | Demonstrates using multiple MCP servers (sequential-thinking and memory) together | [multiple-servers.ts](./src/multiple-servers.ts)       | `npm run multiple-servers` |
+| Custom Configuration      | Shows how to configure environment variables and set max steps                    | [custom-config.ts](./src/custom-config.ts)             | `npm run custom-config`    |
+| Claude Model              | Example of using Anthropic's Claude model instead of OpenAI                       | [claude-example.ts](./src/claude-example.ts)           | `npm run claude-example`   |
+| Image Processing          | Demonstrates sending and processing images with MCP Agent                         | [image-example.ts](./src/image-example.ts)             | `npm run image-example`    |
+| PDF Processing            | Shows how to process PDF documents using MCP Agent                                | [pdf-example.ts](./src/pdf-example.ts)                 | `npm run pdf-example`      |
+| Find MCP Server           | Example of searching for an appropriate MCP server for a specific task            | [find-mcp.ts](./src/find-mcp.ts)                       | `npm run find-mcp`         |
+| Crew Example              | Demonstrates using the crew-style agent architecture                              | [crew-example.ts](./src/crew-example.ts)               | `npm run crew-example`     |
+| Manus Like Research Agent | Advanced autonomous agent that performs complex research tasks                    | [manus-like-research.ts](./src/manus-research-task.ts) | `npm run manus-research`   |
 
 ## Basic Examples
 
