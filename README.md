@@ -4,15 +4,16 @@ This directory contains example usage of the MCP Agent library.
 
 ## Overview of Examples
 
-| Example              | Description                                                                       | Source File                                      |
-| -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Basic Usage          | Simple example showing how to initialize an agent and generate a response         | [basic-usage.ts](./src/basic-usage.ts)           |
-| Multiple Servers     | Demonstrates using multiple MCP servers (sequential-thinking and memory) together | [multiple-servers.ts](./src/multiple-servers.ts) |
-| Custom Configuration | Shows how to configure environment variables and set max steps                    | [custom-config.ts](./src/custom-config.ts)       |
-| Claude Model         | Example of using Anthropic's Claude model instead of OpenAI                       | [claude-example.ts](./src/claude-example.ts)     |
-| Image Processing     | Demonstrates sending and processing images with MCP Agent                         | [image-example.ts](./src/image-example.ts)       |
-| PDF Processing       | Shows how to process PDF documents using MCP Agent                                | [pdf-example.ts](./src/pdf-example.ts)           |
-| Find MCP Server      | Example of searching for an appropriate MCP server for a specific task            | [find-mcp.ts](./src/find-mcp.ts)                 |
+| Example                   | Description                                                                       | Source File                                            |
+| ------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Basic Usage               | Simple example showing how to initialize an agent and generate a response         | [basic-usage.ts](./src/basic-usage.ts)                 |
+| Multiple Servers          | Demonstrates using multiple MCP servers (sequential-thinking and memory) together | [multiple-servers.ts](./src/multiple-servers.ts)       |
+| Custom Configuration      | Shows how to configure environment variables and set max steps                    | [custom-config.ts](./src/custom-config.ts)             |
+| Claude Model              | Example of using Anthropic's Claude model instead of OpenAI                       | [claude-example.ts](./src/claude-example.ts)           |
+| Image Processing          | Demonstrates sending and processing images with MCP Agent                         | [image-example.ts](./src/image-example.ts)             |
+| PDF Processing            | Shows how to process PDF documents using MCP Agent                                | [pdf-example.ts](./src/pdf-example.ts)                 |
+| Find MCP Server           | Example of searching for an appropriate MCP server for a specific task            | [find-mcp.ts](./src/find-mcp.ts)                       |
+| Manus Like Research Agent | Advanced autonomous agent that performs complex research tasks                    | [manus-like-research.ts](./src/manus-research-task.ts) |
 
 ## Basic Examples
 
@@ -489,6 +490,9 @@ Follow these steps to run any of the examples:
 
    # Crew example
    npm run crew-example
+
+   # Advanced Manus-inspired research agent
+   npm run manus-research
    ```
 
 4. **Alternative: Run manually**:
@@ -516,6 +520,7 @@ Follow these steps to run any of the examples:
 - `src/image-example.ts` - Example demonstrating image processing capabilities
 - `src/pdf-example.ts` - Example demonstrating PDF processing capabilities
 - `src/find-mcp.ts` - Example of searching for an appropriate MCP server for a specific task
+- `src/manus-research-task.ts` - Advanced example demonstrating a Manus-like autonomous research agent
 
 ## Requirements
 
@@ -523,3 +528,61 @@ Follow these steps to run any of the examples:
 - npm or yarn
 - API keys for the models you want to use
 - Environment variables in `.env` file
+
+### 8. Advanced Research Agent (Manus-inspired)
+
+```typescript
+import { AIAgent, Servers } from "mcp-ai-agent";
+import { anthropic } from "@ai-sdk/anthropic";
+import * as dotenv from "dotenv";
+
+// Create a specialized web research agent with custom system prompt
+const braveSearchAgent = new AIAgent({
+  name: "Research Agent",
+  description: "Use this agent to search the web for information",
+  systemPrompt:
+    "You are a specialized web research agent with expertise in finding accurate and relevant information. When given a search query:\n\n1. Formulate effective search queries that target the most reliable sources\n2. Evaluate search results critically for reliability and relevance\n3. Extract key information, paying attention to dates, authors, and credibility\n4. When possible, verify information across multiple sources\n5. Save important findings with proper citations including URLs and publication dates\n6. Prioritize academic, governmental, and established industry sources \n7. Provide comprehensive information rather than superficial summaries\n8. When searching technical topics, focus on authoritative technical documentation\n9. Identify contradictory information and highlight areas of consensus vs. debate\n10. Clearly separate facts from opinions or speculative content\n\nYour goal is to gather thorough and accurate information to support high-quality research and decision-making.",
+  model: anthropic("claude-3-7-sonnet-20250219"),
+  toolsConfigs: [Servers.braveSearch, Servers.sequentialThinking],
+});
+
+// Create the master Manus-like agent
+const manusAgent = new AIAgent({
+  name: "Manus Research Agent",
+  description:
+    "An autonomous AI agent that performs comprehensive research and generates detailed reports",
+  model: anthropic("claude-3-7-sonnet-20250219"),
+  toolsConfigs: [
+    { type: "agent", agent: braveSearchAgent },
+    Servers.sequentialThinking,
+    Servers.fileSystem,
+  ],
+});
+
+// Example task: Comprehensive research on quantum computing's impact on cybersecurity
+// The agent will:
+// 1. Plan the research by breaking it into steps
+// 2. Conduct web research using the specialized search agent
+// 3. Save findings to files using the fileSystem server
+// 4. Analyze the data using sequential thinking
+// 5. Generate a comprehensive report
+// 6. Store key findings in memory
+
+// The example also demonstrates:
+// - Following up with memory-based questions
+// - Complex multi-step task execution
+// - Autonomous decision making
+```
+
+This example demonstrates an advanced autonomous agent implementation inspired by Manus. It showcases:
+
+- Using a specialized research agent with a custom system prompt
+- Breaking down complex research tasks into steps
+- Working with multiple MCP servers (sequential thinking, file system)
+- Generating comprehensive research reports
+- Persisting information through files
+- Handling multi-step workflows autonomously
+
+Documents are created by default under `~/Documents`
+
+This is an excellent example for understanding how to build more powerful agent architectures that can handle complex, open-ended tasks requiring multiple capabilities working together.
