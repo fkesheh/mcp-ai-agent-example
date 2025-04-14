@@ -1,4 +1,4 @@
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
@@ -13,14 +13,19 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 async function runExample() {
-  // Create an MCPAgent with inline JSON configuration
-  const agent = new MCPAgent(Servers.sequentialThinking);
+  // Create an AIAgent using a predefined server
+  const agent = new AIAgent({
+    name: "sequentialThinking",
+    description: "Sequential thinking server",
+    model: openai("gpt-4o"),
+    toolsConfigs: [Servers.sequentialThinking],
+  });
 
   try {
     // Initialize the agent (connects to all servers)
-    console.log("Initializing MCPAgent...");
+    console.log("Initializing AIAgent...");
     await agent.initialize();
-    console.log("MCPAgent initialized successfully");
+    console.log("AIAgent initialized successfully");
 
     // Example: Using sequential thinking
     console.log("\nUsing sequential thinking to answer a question...");
@@ -43,7 +48,7 @@ async function runExample() {
     // Always close the agent when done
     try {
       await agent.close();
-      console.log("MCPAgent closed");
+      console.log("AIAgent closed");
     } catch (closeError) {
       console.error(
         "Error closing agent:",

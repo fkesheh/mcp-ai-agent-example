@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import fs from "fs";
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 
 // Ensure required environment variables are set
 if (!process.env.OPENAI_API_KEY) {
@@ -9,8 +9,13 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 async function main() {
-  // Initialize the MCPAgent with the sequential-thinking server
-  const agent = new MCPAgent(Servers.sequentialThinking);
+  // Initialize the AI Agent with the sequential-thinking server
+  const agent = new AIAgent({
+    name: "sequentialThinking",
+    description: "Sequential thinking server",
+    model: openai("gpt-4o"),
+    toolsConfigs: [Servers.sequentialThinking],
+  });
 
   try {
     // Initialize the agent

@@ -1,7 +1,7 @@
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 import { anthropic } from "@ai-sdk/anthropic";
 import * as dotenv from "dotenv";
-
+import { z } from "zod";
 // Load environment variables
 dotenv.config();
 
@@ -13,14 +13,45 @@ if (!process.env.ANTHROPIC_API_KEY) {
 }
 
 async function runExample() {
-  // Create an MCPAgent with Claude model
-  const agent = new MCPAgent(Servers.sequentialThinking);
+  // Create an AIAgent with Claude model
+  const agent = new AIAgent({
+    name: "sequentialThinking",
+    description: "Sequential thinking server",
+    model: anthropic("claude-3-7-sonnet-20250219"),
+    toolsConfigs: [
+      Servers.sequentialThinking,
+      {
+        type: "tool",
+        name: "multiplier",
+        description: "Multiply two numbers",
+        parameters: z.object({
+          a: z.number(),
+          b: z.number(),
+        }),
+        execute: async ({ a, b }) => {
+          return a * b;
+        },
+      },
+      {
+        type: "tool",
+        name: "divider",
+        description: "Divide two numbers",
+        parameters: z.object({
+          a: z.number(),
+          b: z.number(),
+        }),
+        execute: async ({ a, b }) => {
+          return a / b;
+        },
+      },
+    ],
+  });
 
   try {
     // Initialize the agent
-    console.log("Initializing MCPAgent with Claude...");
+    console.log("Initializing AIAgent with Claude...");
     await agent.initialize();
-    console.log("MCPAgent initialized successfully");
+    console.log("AIAgent initialized successfully");
 
     // Example: Using Claude with sequential thinking
     console.log("\nUsing Claude to solve a complex problem...");
@@ -44,7 +75,7 @@ async function runExample() {
     // Always close the agent when done
     try {
       await agent.close();
-      console.log("MCPAgent closed");
+      console.log("AIAgent closed");
     } catch (closeError) {
       console.error(
         "Error closing agent:",

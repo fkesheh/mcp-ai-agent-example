@@ -19,39 +19,52 @@ This directory contains example usage of the MCP Agent library.
 ### 1. Basic Usage
 
 ```typescript
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const agent = new MCPAgent(Servers.sequentialThinking);
+const agent = new AIAgent({
+  name: "sequentialThinking",
+  description: "Sequential thinking server",
+  model: openai("gpt-4o"),
+  toolsConfigs: [Servers.sequentialThinking],
+});
 
-await agent.initialize();
-const response = await agent.generateResponse(
-  "Solve 23 * 17",
-  openai("gpt-4o")
-);
-console.log(response);
+// Initialize and use the agent
+const response = await agent.generateResponse({
+  prompt: "What is 25 * 25?",
+  model: openai("gpt-4o-mini"),
+});
+console.log(response.text);
 await agent.close();
 ```
 
 ### 2. Multiple MCP Servers
 
 ```typescript
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const agent = new MCPAgent(Servers.sequentialThinking, {
-  mcpServers: {
-    memory: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-memory"],
+const agent = new AIAgent({
+  name: "Multi-Capability Agent",
+  description: "An agent with multiple specialized capabilities",
+  model: openai("gpt-4o"),
+  toolsConfigs: [
+    Servers.sequentialThinking,
+    {
+      mcpServers: {
+        memory: {
+          command: "npx",
+          args: ["-y", "@modelcontextprotocol/server-memory"],
+        },
+      },
     },
-  },
+  ],
 });
 
 await agent.initialize();
@@ -59,72 +72,118 @@ const response = await agent.generateResponse(
   "First solve this problem: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?. Then store the result in your Knowledge Graph memory.",
   openai("gpt-4o")
 );
-console.log(response);
+console.log(response.text);
 await agent.close();
 ```
 
 ### 3. Custom Configuration
 
 ```typescript
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const agent = new MCPAgent({
-  mcpServers: {
-    "sequential-thinking": {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      env: {
-        DEBUG: "true",
-        MAX_STEPS: "10",
+const agent = new AIAgent({
+  name: "Custom Config Agent",
+  description: "Agent with custom environment variables",
+  model: openai("gpt-4o"),
+  toolsConfigs: [
+    {
+      mcpServers: {
+        "sequential-thinking": {
+          command: "npx",
+          args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+          env: {
+            DEBUG: "true",
+            MAX_STEPS: "10",
+          },
+        },
       },
     },
-  },
+  ],
 });
 
 await agent.initialize();
-const response = await agent.generateResponse(
-  "Solve this complex problem: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?",
-  openai("gpt-4o"),
-  15 // maxSteps
-);
-console.log(response);
+const response = await agent.generateResponse({
+  prompt:
+    "Solve this complex problem: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?",
+  model: openai("gpt-4o"),
+  maxSteps: 15,
+});
+console.log(response.text);
 await agent.close();
 ```
 
 ### 4. Using Claude Model
 
 ```typescript
-import { MCPAgent, Servers } from "mcp-ai-agent";
-import { claude } from "@ai-sdk/claude";
+import { AIAgent, Servers } from "mcp-ai-agent";
+import { anthropic } from "@ai-sdk/anthropic";
 import * as dotenv from "dotenv";
+import { z } from "zod";
 
 dotenv.config();
 
-const agent = new MCPAgent(Servers.sequentialThinking);
+const agent = new AIAgent({
+  name: "Claude Agent",
+  description: "Agent using Anthropic's Claude model",
+  model: anthropic("claude-3-7-sonnet-20250219"),
+  toolsConfigs: [
+    Servers.sequentialThinking,
+    {
+      type: "tool",
+      name: "multiplier",
+      description: "Multiply two numbers",
+      parameters: z.object({
+        a: z.number(),
+        b: z.number(),
+      }),
+      execute: async ({ a, b }) => {
+        return a * b;
+      },
+    },
+    {
+      type: "tool",
+      name: "divider",
+      description: "Divide two numbers",
+      parameters: z.object({
+        a: z.number(),
+        b: z.number(),
+      }),
+      execute: async ({ a, b }) => {
+        return a / b;
+      },
+    },
+  ],
+});
 
 await agent.initialize();
-const response = await agent.generateResponse(
-  "Solve this complex problem step by step: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?",
-  claude("claude-3.7-sonnet"),
-  25 // Max steps
-);
-console.log(response);
+const response = await agent.generateResponse({
+  prompt:
+    "Solve this complex problem step by step: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?",
+  model: anthropic("claude-3-7-sonnet-20250219"),
+  maxSteps: 25,
+});
+console.log(response.text);
 await agent.close();
 ```
 
 ### 5. Processing Images
 
 ```typescript
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import fs from "fs";
 import path from "path";
 
-const agent = new MCPAgent(Servers.sequentialThinking);
+const agent = new AIAgent({
+  name: "Image Processing Agent",
+  description: "Agent capable of processing images",
+  model: openai("gpt-4o"),
+  toolsConfigs: [Servers.sequentialThinking],
+});
 
 await agent.initialize();
 
@@ -159,12 +218,17 @@ await agent.close();
 ### 6. Processing PDFs
 
 ```typescript
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import fs from "fs";
 import path from "path";
 
-const agent = new MCPAgent(Servers.sequentialThinking);
+const agent = new AIAgent({
+  name: "PDF Processing Agent",
+  description: "Agent capable of processing PDF documents",
+  model: openai("gpt-4o"),
+  toolsConfigs: [Servers.sequentialThinking],
+});
 
 await agent.initialize();
 
@@ -202,8 +266,7 @@ await agent.close();
 
 ```typescript
 import { openai } from "@ai-sdk/openai";
-import fs from "fs";
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 
 // Ensure required environment variables are set
 if (!process.env.OPENAI_API_KEY) {
@@ -212,8 +275,13 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 async function main() {
-  // Initialize the MCPAgent with both the braveSearch and sequentialThinking servers
-  const agent = new MCPAgent(Servers.braveSearch, Servers.sequentialThinking);
+  // Initialize the AIAgent with both the braveSearch and sequentialThinking servers
+  const agent = new AIAgent({
+    name: "Tool Finder",
+    description: "Agent for finding appropriate MCP servers",
+    model: openai("gpt-4o"),
+    toolsConfigs: [Servers.braveSearch, Servers.sequentialThinking],
+  });
 
   try {
     // Initialize the agent
@@ -252,6 +320,84 @@ async function main() {
 main();
 ```
 
+## Multi-Agent Workflows (Agent Composition)
+
+You can create specialized agents and compose them into a master agent that can delegate tasks:
+
+```typescript
+import { AIAgent, Servers } from "mcp-ai-agent";
+import { openai } from "@ai-sdk/openai";
+
+// Create specialized agents for different tasks
+const sequentialThinkingAgent = new AIAgent({
+  name: "Sequential Thinker",
+  description:
+    "Use this agent to think sequentially and resolve complex problems",
+  model: openai("gpt-4o"),
+  toolsConfigs: [Servers.sequentialThinking],
+});
+
+const braveSearchAgent = new AIAgent({
+  name: "Brave Search",
+  description: "Use this agent to search the web for the latest information",
+  model: openai("gpt-4o"),
+  toolsConfigs: [Servers.braveSearch],
+});
+
+const memoryAgent = new AIAgent({
+  name: "Memory Agent",
+  description: "Use this agent to store and retrieve memories",
+  model: openai("gpt-4o"),
+  toolsConfigs: [
+    {
+      mcpServers: {
+        memory: {
+          command: "npx",
+          args: ["-y", "@modelcontextprotocol/server-memory"],
+        },
+      },
+    },
+  ],
+});
+
+// Create a master agent that can use all specialized agents
+const masterAgent = new AIAgent({
+  name: "Master Agent",
+  description: "An agent that can manage and delegate to specialized agents",
+  model: openai("gpt-4o"),
+  toolsConfigs: [
+    {
+      type: "agent",
+      agent: sequentialThinkingAgent,
+    },
+    {
+      type: "agent",
+      agent: memoryAgent,
+    },
+    {
+      type: "agent",
+      agent: braveSearchAgent,
+    },
+  ],
+});
+
+// Initialize and use the master agent
+const response = await masterAgent.generateResponse({
+  prompt: "What is the latest Bitcoin price? Store the answer in memory.",
+  model: openai("gpt-4o"),
+});
+
+console.log(response.text);
+
+// You can ask the memory agent about information stored by the master agent
+const memoryResponse = await masterAgent.generateResponse({
+  prompt: "What information have we stored about Bitcoin price?",
+  model: openai("gpt-4o"),
+});
+
+console.log(memoryResponse.text);
+```
+
 ## Using Different Models
 
 The MCP Agent supports various AI models through the AI SDK. Here are examples of how to use different models:
@@ -271,19 +417,32 @@ const model = openai("gpt-3.5-turbo");
 ### Claude Models
 
 ```typescript
-import { claude } from "@ai-sdk/claude";
+import { anthropic } from "@ai-sdk/anthropic";
 
 // Using Claude 3.7 Sonnet
-const model = claude("claude-3.7-sonnet");
+const model = anthropic("claude-3-7-sonnet-20250219");
 
 // Using Claude 3.7 Sonnet with reasoning middleware
 const enhancedModel = wrapLanguageModel({
-  model: claude("claude-3.7-sonnet"),
+  model: anthropic("claude-3-7-sonnet-20250219"),
   middleware: extractReasoningMiddleware({ tagName: "think" }),
 });
 ```
 
 It also supports any model supported by Vercel AI SDK that support tool usage: https://sdk.vercel.ai/providers/ai-sdk-providers
+
+## Supported MCP Servers
+
+MCP AI Agent comes with preconfigured support for the following servers:
+
+- **Sequential Thinking**: Use to break down complex problems into steps
+- **Memory**: Persistent memory for conversation context
+- **AWS KB Retrieval**: Retrieve information from AWS Knowledge Bases
+- **Brave Search**: Perform web searches using Brave Search API
+- **Everart**: Create and manipulate images using AI
+- **Fetch**: Retrieve data from URLs
+- **Firecrawl MCP**: Web crawling and retrieval capabilities
+- **SQLite**: Query and manipulate SQLite databases
 
 ## Running Examples
 
@@ -327,6 +486,9 @@ Follow these steps to run any of the examples:
 
    # Find MCP server example
    npm run find-mcp
+
+   # Crew example
+   npm run crew-example
    ```
 
 4. **Alternative: Run manually**:

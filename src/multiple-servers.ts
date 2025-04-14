@@ -1,4 +1,4 @@
-import { MCPAgent, Servers } from "mcp-ai-agent";
+import { AIAgent, Servers } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
@@ -6,13 +6,21 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
-  const agent = new MCPAgent(Servers.sequentialThinking, {
-    mcpServers: {
-      memory: {
-        command: "npx",
-        args: ["-y", "@modelcontextprotocol/server-memory"],
+  const agent = new AIAgent({
+    name: "sequentialThinking",
+    description: "Sequential thinking server",
+    model: openai("gpt-4o"),
+    toolsConfigs: [
+      Servers.sequentialThinking,
+      {
+        mcpServers: {
+          memory: {
+            command: "npx",
+            args: ["-y", "@modelcontextprotocol/server-memory"],
+          },
+        },
       },
-    },
+    ],
   });
 
   try {
@@ -22,14 +30,18 @@ async function main() {
         "First solve this problem: If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet, and how far from station A will they meet?. Then store the result in your Knowledge Graph memory.",
       model: openai("gpt-4o"),
     });
-    console.log("Response:", response.text);
+    console.log("Response From Sequential Thinking:", response.text);
 
     const response2 = await agent.generateResponse({
       prompt:
         "From your Knowledge Graph memory, retrieve the result of the problem If a train leaves station A traveling east at 80 km/h, and another train leaves station B (300 km away) traveling west at 65 km/h at the same time, how long will it take for the trains to meet?",
+      onStepFinish: (step) => {
+        console.log("Step:", step.stepType);
+        console.log("Tool:", step.toolResults);
+      },
       model: openai("gpt-4o"),
     });
-    console.log("Response:", response2);
+    console.log("Response From Memory:", response2.text);
   } catch (error) {
     console.error("Error:", error);
   } finally {

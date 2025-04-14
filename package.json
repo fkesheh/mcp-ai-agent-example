@@ -8,11 +8,11 @@
     "@ai-sdk/anthropic": "^1.2.2",
     "@ai-sdk/openai": "^1.3.3",
     "dotenv": "^16.4.7",
-    "mcp-ai-agent": "^0.0.10",
+    "mcp-ai-agent": "^0.0.12",
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "start": "npm run build && node dist/basic-usage.js",
     "basic-usage": "npm run build && node dist/basic-usage.js",
     "multiple-servers": "npm run build && node dist/multiple-servers.js",
@@ -20,7 +20,8 @@
     "claude-example": "npm run build && node dist/claude-example.js",
     "image-example": "npm run build && node dist/image-example.js",
     "pdf-example": "npm run build && node dist/pdf-example.js",
-    "find-mcp": "npm run build && node dist/find-mcp.js"
+    "find-mcp": "npm run build && node dist/find-mcp.js",
+    "crew-example": "npm run build && node dist/crew-example.js"
   },
   "devDependencies": {
     "@types/node": "^20.11.0"

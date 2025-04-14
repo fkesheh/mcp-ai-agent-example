@@ -1,4 +1,4 @@
-import { MCPAgent } from "mcp-ai-agent";
+import { AIAgent } from "mcp-ai-agent";
 import { openai } from "@ai-sdk/openai";
 import * as dotenv from "dotenv";
 
@@ -6,17 +6,24 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
-  const agent = new MCPAgent({
-    mcpServers: {
-      "sequential-thinking": {
-        command: "npx",
-        args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-        env: {
-          DEBUG: "true",
-          MAX_STEPS: "10",
+  const agent = new AIAgent({
+    name: "sequentialThinking",
+    description: "Sequential thinking server",
+    model: openai("gpt-4o"),
+    toolsConfigs: [
+      {
+        mcpServers: {
+          "sequential-thinking": {
+            command: "npx",
+            args: ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+            env: {
+              DEBUG: "true",
+              MAX_STEPS: "10",
+            },
+          },
         },
       },
-    },
+    ],
   });
 
   try {
